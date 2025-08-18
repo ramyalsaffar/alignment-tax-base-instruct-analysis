@@ -1,7 +1,7 @@
 # 🚨 Negative Alignment Tax Discovery: Challenging AI Safety Assumptions
 
 ## Key Finding
-**PARADIGM-SHIFTING DISCOVERY**: This research reveals **negative alignment tax** across all evaluated dimensions, providing empirical evidence that instruction-tuning can improve rather than degrade model capabilities - challenging conventional alignment tax theory.
+** DISCOVERY**: This research reveals **negative alignment tax** across all evaluated dimensions, providing empirical evidence that instruction-tuning can improve rather than degrade model capabilities - challenging conventional alignment tax theory.
 
 ## 📊 Executive Summary
 
