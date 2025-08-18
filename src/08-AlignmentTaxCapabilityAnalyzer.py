@@ -99,7 +99,7 @@ class AlignmentTaxCapabilityAnalyzer:
         if save_results and run_id:
             results_filename = f'capability_subset_results_{run_id}.pkl'
             
-            with open(results_path + results_filename, 'wb') as f:
+            with open(data_path + results_filename, 'wb') as f:
                 pickle.dump(self.capability_results, f)
             
             print(f"\n💾 Detailed results saved: {results_filename}")
