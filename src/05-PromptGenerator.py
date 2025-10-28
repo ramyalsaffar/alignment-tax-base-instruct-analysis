@@ -40,20 +40,6 @@ class PromptGenerator:
         return target_count + buffer_count
 
 
-    def enumerate_prompts(self, prompts):
-        """
-        Add enumeration to prompts (1., 2., 3., etc.)
-        Helps GPT generate the exact count requested
-
-        Args:
-            prompts: List of prompt strings
-
-        Returns:
-            List of enumerated prompt strings
-        """
-        return [f"{i+1}. {prompt}" for i, prompt in enumerate(prompts)]
-
-
     def remove_enumeration(self, prompt):
         """
         Remove enumeration from prompt before feeding to models
@@ -64,7 +50,6 @@ class PromptGenerator:
         Returns:
             Clean prompt string without enumeration
         """
-        import re
         # Remove pattern like "1. " or "123. " from start of string
         return re.sub(r'^\d+\.\s+', '', prompt)
 
@@ -78,7 +63,11 @@ class PromptGenerator:
         buffered_count = self.get_buffered_prompt_count(prompts_per_approach)
 
         all_prompts = []
-        for approach in approaches:
+
+        # Progress bar for approaches within this axis
+        approach_iterator = tqdm(approaches, desc=f"  Refusal approaches (attempt {attempt_num})", leave=False) if attempt_num == 1 else approaches
+
+        for approach in approach_iterator:
 
             # Specific prompt for each approach
             approach_prompts = {
@@ -144,9 +133,12 @@ Return only the numbered test prompts, one per line."""
         # Use the class method for buffer calculation
         buffered_count = self.get_buffered_prompt_count(prompts_per_approach)
 
-
         all_prompts = []
-        for approach in approaches:
+
+        # Progress bar for approaches within this axis
+        approach_iterator = tqdm(approaches, desc=f"  Creativity approaches (attempt {attempt_num})", leave=False) if attempt_num == 1 else approaches
+
+        for approach in approach_iterator:
 
             approach_prompts = {
                     'novelty': f"""Generate exactly {buffered_count} prompts that test pure creative imagination and originality.
@@ -204,7 +196,11 @@ Return only the numbered prompts, one per line."""
         buffered_count = self.get_buffered_prompt_count(prompts_per_approach)
 
         all_prompts = []
-        for approach in approaches:
+
+        # Progress bar for approaches within this axis
+        approach_iterator = tqdm(approaches, desc=f"  Helpfulness approaches (attempt {attempt_num})", leave=False) if attempt_num == 1 else approaches
+
+        for approach in approach_iterator:
 
             approach_prompts = {
                     'simple': f"""Generate exactly {buffered_count} simple, straightforward help requests.
@@ -261,9 +257,12 @@ Return only the numbered prompts, one per line."""
         # Use the class method for buffer calculation
         buffered_count = self.get_buffered_prompt_count(prompts_per_approach)
 
-
         all_prompts = []
-        for approach in approaches:
+
+        # Progress bar for approaches within this axis
+        approach_iterator = tqdm(approaches, desc=f"  Hedging approaches (attempt {attempt_num})", leave=False) if attempt_num == 1 else approaches
+
+        for approach in approach_iterator:
 
             approach_prompts = {
                     'predictions': f"""Generate exactly {buffered_count} prompts asking for specific future predictions.
@@ -327,6 +326,10 @@ Return only the numbered prompts, one per line."""
         """
         # Calculate buffer
         buffered_count = self.get_buffered_prompt_count(total_prompts)
+
+        # Show progress for hallucination (single approach, so just a simple indicator)
+        if attempt_num == 1:
+            print(f"  Generating hallucination prompts (diverse approach)...")
 
         generation_prompt = f"""Generate exactly {buffered_count} prompts asking for specific factual information to test knowledge accuracy.
     Mix difficulty levels: some well-known facts, some obscure details, some very specific technical information.
@@ -433,9 +436,10 @@ Return only the numbered prompts, one per line."""
         all_prompts = {}
 
         print(f"\n🎯 GENERATING PROMPTS FOR ALL AXES")
-        print(f"{'='*60}")
+        print(f"{'='*60}\n")
 
-        for axis, count in axes_config.items():
+        # Add progress bar for axes
+        for axis, count in tqdm(axes_config.items(), desc="Generating prompts for axes", unit="axis"):
             all_prompts[axis] = self.validate_and_generate_prompts(axis, count)
 
         # Print summary
