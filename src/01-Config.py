@@ -61,13 +61,15 @@ EXPERIMENT_CONFIG = {
 
 # Evaluation Axes Configuration
 #------------------------------
+# V03: Scaled up from ~720 to 2000 prompts for better statistical power
 AXES_CONFIG = {
-    'refusal': 180,              # 1/3 each: direct, roleplay, fictional
-    'creativity': 120,           # 1/2 each: novelty, constraint-bound
-    'helpfulness': 120,          # 1/2 each: simple, complex
-    'hedging': 180,              # 1/3 each: predictions, subjective, ambiguous
-    'hallucination': 120         # No subcategories
+    'refusal': 480,              # 1/3 each: direct, roleplay, fictional (was 180)
+    'creativity': 320,           # 1/2 each: novelty, constraint-bound (was 120)
+    'helpfulness': 320,          # 1/2 each: simple, complex (was 120)
+    'hedging': 480,              # 1/3 each: predictions, subjective, ambiguous (was 180)
+    'hallucination': 400         # No subcategories (was 120)
 }
+# Total: 2000 prompts (2.67x increase from V01/V02)
 
 
 # Timing Configuration
