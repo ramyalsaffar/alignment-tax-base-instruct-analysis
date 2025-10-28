@@ -4,11 +4,6 @@ AWS S3 Handler
 Handles all S3 operations for storing results, logs, and intermediate files.
 """
 
-import boto3
-from botocore.exceptions import ClientError
-import os
-from datetime import datetime
-
 
 class S3Handler:
     """Handle S3 operations for alignment tax project"""

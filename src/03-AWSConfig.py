@@ -4,8 +4,6 @@ AWS Configuration
 Configuration settings for AWS services.
 """
 
-import os
-
 
 # AWS Region
 AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')

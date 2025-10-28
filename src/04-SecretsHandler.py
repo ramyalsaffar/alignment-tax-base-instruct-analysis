@@ -4,10 +4,6 @@ AWS Secrets Manager Handler
 Retrieves sensitive information (API keys) from AWS Secrets Manager.
 """
 
-import boto3
-from botocore.exceptions import ClientError
-import json
-
 
 class SecretsHandler:
     """Handle AWS Secrets Manager operations"""

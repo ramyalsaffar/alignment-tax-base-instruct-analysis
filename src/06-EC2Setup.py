@@ -4,10 +4,6 @@ AWS EC2 Setup
 Helper functions for setting up and managing EC2 instances for alignment tax experiments.
 """
 
-import boto3
-from botocore.exceptions import ClientError
-import time
-
 
 class EC2Manager:
     """Manage EC2 instances for alignment tax experiments"""

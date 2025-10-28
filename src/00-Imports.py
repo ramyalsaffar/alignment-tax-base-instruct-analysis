@@ -53,6 +53,9 @@ import seaborn as sns
 import openai
 from llama_cpp import Llama
 
+import boto3
+from botocore.exceptions import ClientError
+
 import matplotlib.patches as mpatches
 from matplotlib.patches import Patch 
 
