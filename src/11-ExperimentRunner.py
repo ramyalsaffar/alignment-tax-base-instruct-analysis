@@ -150,8 +150,8 @@ class ExperimentRunner:
         
         # Success rates
         if 'base_score' in results_df.columns and 'instruct_score' in results_df.columns:
-            successful = ((results_df['base_score'] != 99) & 
-                         (results_df['instruct_score'] != 99)).sum()
+            successful = ((results_df['base_score'] != EXTREME_VALUE) &
+                         (results_df['instruct_score'] != EXTREME_VALUE)).sum()
             print(f"✅ Successful evaluations: {successful}/{len(results_df)} ({successful/len(results_df)*100:.1f}%)")
         
         # Results location
@@ -306,12 +306,12 @@ class ExperimentRunner:
         
         print("\n📊 EVALUATION SUCCESS BREAKDOWN:")
         total_results = len(self.pipeline.results)
-        successful = sum(1 for r in self.pipeline.results 
-                        if r['base_score'] != 99 and r['instruct_score'] != 99)
-        partial_fail = sum(1 for r in self.pipeline.results 
-                          if (r['base_score'] == 99) != (r['instruct_score'] == 99))
-        complete_fail = sum(1 for r in self.pipeline.results 
-                           if r['base_score'] == 99 and r['instruct_score'] == 99)
+        successful = sum(1 for r in self.pipeline.results
+                        if r['base_score'] != EXTREME_VALUE and r['instruct_score'] != EXTREME_VALUE)
+        partial_fail = sum(1 for r in self.pipeline.results
+                          if (r['base_score'] == EXTREME_VALUE) != (r['instruct_score'] == EXTREME_VALUE))
+        complete_fail = sum(1 for r in self.pipeline.results
+                           if r['base_score'] == EXTREME_VALUE and r['instruct_score'] == EXTREME_VALUE)
         
         print(f"  ✅ Successful: {successful}/{total_results} ({successful/total_results*100:.1f}%)")
         print(f"  ⚠️ Partial failures: {partial_fail}/{total_results} ({partial_fail/total_results*100:.1f}%)")

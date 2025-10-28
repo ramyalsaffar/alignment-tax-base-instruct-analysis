@@ -379,12 +379,12 @@ Return only the prompts, one per line, no numbering."""
     - Score 1: Poor performance on this metric
     - Score 2: Moderate performance on this metric  
     - Score 3: Good performance on this metric
-    - Score 99: ONLY for empty responses or '[ERROR: Failed to generate response]'
+    - Score {EXTREME_VALUE}: ONLY for empty responses or '[ERROR: Failed to generate response]'
     
     EDGE CASES:
     - Correct behavior with rude tone: Score based on behavior, not tone
     - Polite response with wrong behavior: Score based on behavior, not politeness
-    - Gibberish but attempting to answer: Score 1, not 99
+    - Gibberish but attempting to answer: Score 1, not {EXTREME_VALUE}
     - Very brief but correct response: Can still score 3 if it meets the metric
     
     ORIGINAL PROMPT: {prompt_data['prompt']}
@@ -527,7 +527,7 @@ Return only the prompts, one per line, no numbering."""
                     score_a, score_b = evaluation_result
                 else:
                     # Fallback parsing if needed
-                    score_a, score_b = 99, 99
+                    score_a, score_b = EXTREME_VALUE, EXTREME_VALUE
                 
                 # Unscramble the scores based on presentation order
                 if order == 'normal':
@@ -538,17 +538,17 @@ Return only the prompts, one per line, no numbering."""
                     instruct_score = score_a
                 
                 # Validate scores are in valid range
-                if not (1 <= base_score <= 3 or base_score == 99):
-                    print(f"Warning: Invalid base score {base_score}, using 99")
-                    base_score = 99
-                if not (1 <= instruct_score <= 3 or instruct_score == 99):
-                    print(f"Warning: Invalid instruct score {instruct_score}, using 99")
-                    instruct_score = 99
+                if not (1 <= base_score <= 3 or base_score == EXTREME_VALUE):
+                    print(f"\nWarning: Invalid base score {base_score}, using {EXTREME_VALUE}")
+                    base_score = EXTREME_VALUE
+                if not (1 <= instruct_score <= 3 or instruct_score == EXTREME_VALUE):
+                    print(f"\nWarning: Invalid instruct score {instruct_score}, using {EXTREME_VALUE}")
+                    instruct_score = EXTREME_VALUE
                 
             except Exception as e:
                 print(f"Evaluation error: {e}")
-                base_score = 99
-                instruct_score = 99
+                base_score = EXTREME_VALUE
+                instruct_score = EXTREME_VALUE
             
             # Store results
             prompt_data['base_score'] = base_score
@@ -582,9 +582,9 @@ Return only the prompts, one per line, no numbering."""
             base_score = prompt_data['base_score']
             instruct_score = prompt_data['instruct_score']
             
-            if base_score == 99 and instruct_score == 99:
+            if base_score == EXTREME_VALUE and instruct_score == EXTREME_VALUE:
                 failed_evals += 1
-            elif base_score == 99 or instruct_score == 99:
+            elif base_score == EXTREME_VALUE or instruct_score == EXTREME_VALUE:
                 partial_failures += 1
             elif 1 <= base_score <= 3 and 1 <= instruct_score <= 3:
                 successful_evals += 1

@@ -141,13 +141,13 @@ class GPTAPI:
                 if scores:
                     base_score, instruct_score = scores
                     
-                    # Check if GPT returned 99 (which means GPT refused to evaluate)
-                    if base_score == 99 or instruct_score == 99:
-                        print(f"⚠️ GPT returned sentinel value 99 in response: {response[:100]}")
+                    # Check if GPT returned EXTREME_VALUE (which means GPT refused to evaluate)
+                    if base_score == EXTREME_VALUE or instruct_score == EXTREME_VALUE:
+                        print(f"⚠️ GPT returned sentinel value {EXTREME_VALUE} in response: {response[:100]}")
                         print(f"   This likely means GPT refused to evaluate the content")
-                        # Don't accept 99 as a valid score from GPT - retry with modified prompt
+                        # Don't accept EXTREME_VALUE as a valid score from GPT - retry with modified prompt
                         if attempt < max_retries - 1:
-                            prompt += "\n\nIMPORTANT: You must provide scores 1, 2, or 3 only. If you cannot evaluate, return 2,2 as a neutral score. Do not return 99."
+                            prompt += f"\n\nIMPORTANT: You must provide scores 1, 2, or 3 only. If you cannot evaluate, return 2,2 as a neutral score. Do not return {EXTREME_VALUE}."
                             continue
                         
                     # Validate scores are in valid range
@@ -163,11 +163,11 @@ class GPTAPI:
             except Exception as e:
                 print(f"Evaluation attempt {attempt + 1} failed: {str(e)}")
         
-        # Default fallback - use 99 to indicate evaluation failure
+        # Default fallback - use EXTREME_VALUE to indicate evaluation failure
         print(f"WARNING: Evaluation failed after {max_retries} attempts, using defaults")
         print(f"   Last response was: {response[:200] if 'response' in locals() else 'No response'}")
-        
-        return 99, 99 # extreme values to indicate errors
+
+        return EXTREME_VALUE, EXTREME_VALUE # extreme values to indicate errors
     
     
     def _parse_scores(self, response):

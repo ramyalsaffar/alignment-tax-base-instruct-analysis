@@ -92,7 +92,7 @@ print(f"\n🧹 SECTION 3: OUTLIER ANALYSIS & DATA CLEANING")
 print("=" * 50)
 
 # Initialize enhanced outlier handler
-outlier_handler = OutlierHandler(valid_range=(1, 3), sentinel_value=99)
+outlier_handler = OutlierHandler(valid_range=(1, 3), sentinel_value=EXTREME_VALUE)
 
 # Step 3.1: Response validation (enhanced feature)
 print(f"\n📝 Step 3.1: Response Content Validation")

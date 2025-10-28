@@ -136,7 +136,7 @@ class AlignmentTaxVisualizer:
         
         for axis in df['axis'].unique():
             axis_data = df[df['axis'] == axis]
-            valid_data = axis_data[(axis_data['base_score'] != 99) & (axis_data['instruct_score'] != 99)]
+            valid_data = axis_data[(axis_data['base_score'] != EXTREME_VALUE) & (axis_data['instruct_score'] != EXTREME_VALUE)]
             
             if len(valid_data) > 5:
 
@@ -280,7 +280,7 @@ class AlignmentTaxVisualizer:
         ax7 = plt.subplot(2, 4, 7)
         
         # Create KDE plots for base vs instruct scores
-        valid_data = df[(df['base_score'] != 99) & (df['instruct_score'] != 99)]
+        valid_data = df[(df['base_score'] != EXTREME_VALUE) & (df['instruct_score'] != EXTREME_VALUE)]
         
         sns.kdeplot(data=valid_data['base_score'], label='Base', fill=True, alpha=0.6, 
                    color=self.colors['base'], ax=ax7)
@@ -464,7 +464,7 @@ class AlignmentTaxVisualizer:
         
         for axis in axis_stats.index:
             axis_data = df[df['axis'] == axis]
-            valid_data = axis_data[(axis_data['base_score'] != 99) & (axis_data['instruct_score'] != 99)]
+            valid_data = axis_data[(axis_data['base_score'] != EXTREME_VALUE) & (axis_data['instruct_score'] != EXTREME_VALUE)]
             
             if len(valid_data) > 5:
 
@@ -617,7 +617,7 @@ class AlignmentTaxVisualizer:
         
         # 2. Enhanced distribution comparison
         ax2 = plt.subplot(1, 3, 2)
-        valid_data = df[(df['base_score'] != 99) & (df['instruct_score'] != 99)]
+        valid_data = df[(df['base_score'] != EXTREME_VALUE) & (df['instruct_score'] != EXTREME_VALUE)]
         
         sns.kdeplot(data=valid_data, x='base_score', label='Base', fill=True, alpha=0.5, ax=ax2)
         sns.kdeplot(data=valid_data, x='instruct_score', label='Instruct', fill=True, alpha=0.5, ax=ax2)
@@ -683,7 +683,7 @@ class AlignmentTaxVisualizer:
         id_to_use = identifier or self.default_id
         
         # Initialize outlier handler
-        handler = OutlierHandler(valid_range=(1, 3), sentinel_value=99)
+        handler = OutlierHandler(valid_range=(1, 3), sentinel_value=EXTREME_VALUE)
         
         # Clean data if not pre-cleaned
         if not pre_cleaned:
@@ -703,7 +703,7 @@ class AlignmentTaxVisualizer:
             score_col = f'{model_type}_score'
             
             # Filter out any remaining invalid values (belt and suspenders approach)
-            valid_mask = (df_working[score_col] != 99) & \
+            valid_mask = (df_working[score_col] != EXTREME_VALUE) & \
                          (df_working[score_col] >= 1) & \
                          (df_working[score_col] <= 3)
             
@@ -898,7 +898,7 @@ class AlignmentTaxVisualizer:
         violin_data = []
         for model in ['base', 'instruct']:
             score_col = f'{model}_score'
-            valid_mask = (df_working[score_col] != 99) & \
+            valid_mask = (df_working[score_col] != EXTREME_VALUE) & \
                          (df_working[score_col] >= 1) & \
                          (df_working[score_col] <= 3)
             
@@ -987,7 +987,7 @@ class AlignmentTaxVisualizer:
         return model_scores
 
     
-    def create_outlier_visualization(self, df_raw, df_clean, identifier=None, sentinel_value=99):
+    def create_outlier_visualization(self, df_raw, df_clean, identifier=None, sentinel_value=EXTREME_VALUE):
         """
         Create visualization comparing raw vs cleaned data and showing outlier impact
         
@@ -995,7 +995,7 @@ class AlignmentTaxVisualizer:
             df_raw: Original dataframe with potential outliers
             df_clean: Cleaned dataframe after outlier handling
             identifier: Optional string to identify the source (e.g., timestamp)
-            sentinel_value: Value used to mark failed evaluations (default: 99)
+            sentinel_value: Value used to mark failed evaluations (default: EXTREME_VALUE)
         
         Returns:
             Dictionary with outlier statistics
@@ -1014,7 +1014,7 @@ class AlignmentTaxVisualizer:
         clean_scores = pd.concat([df_clean['base_score'], df_clean['instruct_score']])
         
         ax1.hist([raw_scores[raw_scores != sentinel_value], clean_scores], 
-                 label=['Raw (excl. 99)', 'Cleaned'], 
+                 label=[f'Raw (excl. {EXTREME_VALUE})', 'Cleaned'], 
                  bins=np.arange(0.5, 4.5, 1), 
                  alpha=0.7, color=['blue', 'green'])
         ax1.set_xlabel('Score', fontsize=11)
@@ -1069,7 +1069,7 @@ class AlignmentTaxVisualizer:
         clean_tax = df_clean['alignment_tax']
         
         bp = ax3.boxplot([raw_tax, clean_tax], 
-                          labels=['Raw (excl. 99)', 'Cleaned'],
+                          labels=[f'Raw (excl. {EXTREME_VALUE})', 'Cleaned'],
                           patch_artist=True,
                           notch=True,
                           showmeans=True)

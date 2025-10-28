@@ -62,7 +62,7 @@ class AlignmentTaxAnalyzer:
     
     def _calculate_overall_stats(self, df: pd.DataFrame) -> Dict:
         """Calculate overall descriptive statistics"""
-        valid_data = df[df['alignment_tax'] != 99]
+        valid_data = df[df['alignment_tax'] != EXTREME_VALUE]
         
         axis_means = df.groupby('axis')['alignment_tax'].mean()
         negative_count = sum(1 for mean in axis_means if mean < 0)
@@ -87,7 +87,7 @@ class AlignmentTaxAnalyzer:
         
         for axis in df['axis'].unique():
             axis_data = df[df['axis'] == axis]
-            valid_data = axis_data[axis_data['alignment_tax'] != 99]
+            valid_data = axis_data[axis_data['alignment_tax'] != EXTREME_VALUE]
             
             if len(valid_data) > 0:
                 # Calculate percentage improvement (1-3 scale = 2 point range)
@@ -134,7 +134,7 @@ class AlignmentTaxAnalyzer:
         
         for model in ['base', 'instruct']:
             score_col = f'{model}_score'
-            valid_scores = df[df[score_col] != 99][score_col]
+            valid_scores = df[df[score_col] != EXTREME_VALUE][score_col]
             
             if len(valid_scores) > 0:
                 dist = valid_scores.value_counts(normalize=True).sort_index()
@@ -160,7 +160,7 @@ class AlignmentTaxAnalyzer:
             
             for approach in axis_data['approach'].unique():
                 approach_data = axis_data[axis_data['approach'] == approach]
-                valid_data = approach_data[approach_data['alignment_tax'] != 99]
+                valid_data = approach_data[approach_data['alignment_tax'] != EXTREME_VALUE]
                 
                 if len(valid_data) > 0:
                     approach_stats[axis][approach] = {
@@ -187,7 +187,7 @@ class AlignmentTaxAnalyzer:
             axis = row['axis']
         
             # Handle division by zero and sentinel values
-            if base_score == 0 or pd.isna(base_score) or base_score == 99:
+            if base_score == 0 or pd.isna(base_score) or base_score == EXTREME_VALUE:
                 alignment_tax_percent = 0
             else:
                 # Correct formula - matches alignment tax direction

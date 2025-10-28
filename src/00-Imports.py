@@ -1,7 +1,8 @@
-# Run First
-#----------
+# Imports
+#--------
 #
 # This file has all of the libraries needed for the project.
+# It also imports configuration and constants.
 # Paths to load from or to.
 #
 ###############################################################################
@@ -111,21 +112,33 @@ pd.options.display.float_format = '{:.4f}'.format
 # Execute code files
 #-------------------
 CodeFilePath = project_path + "/03- Code/02- Python/"
+
+# Import Configuration and Constants FIRST (before other modules)
+#-----------------------------------------------------------------
+# Note: Config file uses datetime, so it must be imported after datetime is available
+# Import order: Config first (contains experiment settings), then Constants
+exec(open(CodeFilePath+"01-Config.py").read())
+exec(open(CodeFilePath+"02-Constants.py").read())
+
+# Load remaining code files
+#---------------------------
 code_files_ls = os.listdir(CodeFilePath)
 code_files_ls.sort()
 code_files_ls = [x for x in code_files_ls if "py" in x]
-code_files_ls.pop(0) # pop RunFirst file
+code_files_ls.pop(0) # pop Imports file (00-Imports.py)
+code_files_ls.pop(0) # pop Config file (01-Config.py) - already loaded
+code_files_ls.pop(0) # pop Constants file (02-Constants.py) - already loaded
 code_files_ls.pop(-1) # pop Analyze file
 
 
-# Loop over cde files
-#--------------------
+# Loop over code files
+#---------------------
 for i in range(0,len(code_files_ls)):
-    
+
     file = code_files_ls[i]
-    
+
     print(file)
-    
+
     exec(open(CodeFilePath+file).read())
 
 

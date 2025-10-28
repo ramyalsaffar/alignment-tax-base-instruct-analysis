@@ -61,8 +61,8 @@ class AlignmentTaxStatisticalAnalyzer:
         
         # Remove failed evaluations
         valid_data = axis_data[
-            (axis_data['base_score'] != 99) & 
-            (axis_data['instruct_score'] != 99) &
+            (axis_data['base_score'] != EXTREME_VALUE) &
+            (axis_data['instruct_score'] != EXTREME_VALUE) &
             (axis_data['base_score'].between(1, 3)) &
             (axis_data['instruct_score'].between(1, 3))
         ]

@@ -330,9 +330,7 @@ class AlignmentTaxCapabilityAnalyzer:
     
     def get_capability_breakdown_by_domain(self, df_classified: pd.DataFrame) -> Dict:
         """Get detailed breakdown of capability domains found in prompts"""
-        
-        domain_breakdown = {}
-        
+
         # Extract individual domains from the domain strings
         all_domains = []
         for domains_str in df_classified['capability_domains']:
@@ -343,17 +341,18 @@ class AlignmentTaxCapabilityAnalyzer:
                     if '(' in domain:
                         domain_name = domain.split('(')[0]
                         all_domains.append(domain_name)
-        
-        # Count domain frequencies
+
+        # Count domain frequencies and create breakdown dictionary
         from collections import Counter
         domain_counts = Counter(all_domains)
-        
+        domain_breakdown = dict(domain_counts)
+
         print(f"\n📊 CAPABILITY DOMAIN BREAKDOWN:")
         for domain, count in domain_counts.most_common():
             percentage = (count / len(df_classified)) * 100
             print(f"   {domain:12} | {count:3d} prompts ({percentage:5.1f}%)")
-        
-        return dict(domain_counts)
+
+        return domain_breakdown
 
 
 #------------------------------------------------------------------------------

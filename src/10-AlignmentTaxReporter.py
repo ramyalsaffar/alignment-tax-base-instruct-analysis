@@ -294,7 +294,7 @@ class AlignmentTaxReporter:
                     f.write(f"Cleaning Method: {outlier_summary.get('method_used', 'Not specified').upper()}\n\n")
                 
                 if 'sentinel_values' in outlier_summary:
-                    f.write("Failed Evaluations (score=99):\n")
+                    f.write(f"Failed Evaluations (score={EXTREME_VALUE}):\n")
                     for col, info in outlier_summary['sentinel_values'].items():
                         f.write(f"  • {col}: {info['count']} ({info['percentage']:.1f}%)\n")
             

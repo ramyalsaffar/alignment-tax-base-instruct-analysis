@@ -53,7 +53,8 @@ MODEL_CONFIG = {
 EXPERIMENT_CONFIG = {
     'experiment_name': f'alignment_tax_base_v_instruct_{datetime.now().strftime("%Y%m%d_%H%M")}',
     'save_intermediate': True,      # Save after each axis
-    'prompt_buffer_percentage': 5,  # Extra prompts to generate as buffer (percentage)
+    'prompt_buffer_percentage': 20, # Extra prompts to generate as buffer (percentage) - increased for better coverage
+    'max_prompt_generation_attempts': 3,  # Number of retry attempts per axis if GPT generates too few prompts
     'test_sample_size': 3           # Sample size for quick tests (per axis or total for single axis)
 }
 

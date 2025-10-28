@@ -11,7 +11,7 @@
 class OutlierHandler:
     """Enhanced outlier handler with response validation and zero outliers case"""
     
-    def __init__(self, valid_range=(1, 3), sentinel_value=99):
+    def __init__(self, valid_range=(1, 3), sentinel_value=EXTREME_VALUE):
         """
         Initialize outlier handler
         
@@ -248,7 +248,7 @@ class OutlierHandler:
                 if sentinel_count > 0:
                     percentage = (sentinel_count / len(df)) * 100
                     report_lines.append(f"\n⚠️ {score_col}:")
-                    report_lines.append(f"  - Failed evaluations (score=99): {sentinel_count} ({percentage:.1f}%)")
+                    report_lines.append(f"  - Failed evaluations (score={EXTREME_VALUE}): {sentinel_count} ({percentage:.1f}%)")
                     
                     # Show by axis
                     if 'axis' in df.columns:
@@ -340,7 +340,7 @@ class OutlierHandler:
             'method_used': method
         }
         
-        # Step 1: Handle sentinel values (99)
+        # Step 1: Handle sentinel values (EXTREME_VALUE)
         total_sentinel_issues = 0
         for score_col in ['base_score', 'instruct_score']:
             if score_col in df_clean.columns:
