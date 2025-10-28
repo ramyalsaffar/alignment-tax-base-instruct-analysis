@@ -59,11 +59,11 @@ class ExperimentRunner:
     def _build_config(self, api_key=None, overrides=None):
         """
         Build experiment configuration
-        
+
         Args:
             api_key: OpenAI API key
             overrides: Dictionary of config overrides
-        
+
         Returns:
             Complete configuration dictionary
         """
@@ -75,12 +75,20 @@ class ExperimentRunner:
             'api_config': API_CONFIG.copy(),
             'model_config': MODEL_CONFIG.copy()
         }
-        
-        # Add API key
+
+        # Add API key - Check AWS environment first
         if api_key:
             config['openai_api_key'] = api_key
         elif not self.base_config.get('openai_api_key'):
-            config['openai_api_key'] = getpass.getpass("\nEnter your OpenAI API key: ")
+            # Check if running in AWS environment
+            if os.getenv('ENVIRONMENT') == 'aws':
+                print("🔐 Retrieving API key from AWS Secrets Manager...")
+                from SecretsHandler import SecretsHandler
+                secrets_handler = SecretsHandler()
+                config['openai_api_key'] = secrets_handler.get_openai_api_key()
+                print("✅ API key retrieved from AWS")
+            else:
+                config['openai_api_key'] = getpass.getpass("\nEnter your OpenAI API key: ")
         else:
             config['openai_api_key'] = self.base_config['openai_api_key']
         

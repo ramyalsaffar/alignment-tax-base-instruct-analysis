@@ -120,7 +120,7 @@ CodeFilePath = project_path + "/03- Code/02- Python/"
 exec(open(CodeFilePath+"01-Config.py").read())
 exec(open(CodeFilePath+"02-Constants.py").read())
 
-# Load remaining code files (03-22, excluding 21)
+# Load remaining code files (03-21, excluding 22)
 #---------------------------------------------------
 # Files are now numbered 00-22:
 #   00-Imports.py (this file)
@@ -130,16 +130,16 @@ exec(open(CodeFilePath+"02-Constants.py").read())
 #   07-11: Core API & Generation (ModelManager, GPT_API, PromptGenerator, ResponseCollector, ResponseEvaluator)
 #   12-18: Pipeline & Analysis (Pipeline, OutlierHandler, Analyzers, Visualizer, Reporter)
 #   19-20: Experiment Execution (ExperimentRunner, Execute)
-#   21-Analyze.py (don't load - analysis execution script)
-#   22-AnalysisPipeline.py (load - contains AnalysisPipeline class)
+#   21-AnalysisPipeline.py (load - contains AnalysisPipeline class)
+#   22-Analyze.py (don't load - analysis execution script)
 code_files_ls = os.listdir(CodeFilePath)
 code_files_ls.sort()
 code_files_ls = [x for x in code_files_ls if "py" in x]
 code_files_ls.pop(0) # pop Imports file (00-Imports.py)
 code_files_ls.pop(0) # pop Config file (01-Config.py) - already loaded
 code_files_ls.pop(0) # pop Constants file (02-Constants.py) - already loaded
-# Remove 21-Analyze.py (execution script, not a class/function library)
-code_files_ls = [x for x in code_files_ls if x != "21-Analyze.py"]
+# Remove 22-Analyze.py (execution script, not a class/function library)
+code_files_ls = [x for x in code_files_ls if x != "22-Analyze.py"]
 
 
 # Loop over code files

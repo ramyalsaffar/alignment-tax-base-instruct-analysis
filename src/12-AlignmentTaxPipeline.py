@@ -179,7 +179,7 @@ class AlignmentTaxPipeline:
 
     def save_results(self, test_mode=False):
         """
-        Save results to pickle file
+        Save results to pickle file (and S3 if running in AWS)
 
         Args:
             test_mode: Whether this is a test run
@@ -193,8 +193,21 @@ class AlignmentTaxPipeline:
 
         # Save full data as pickle for complete preservation
         pickle_filename = f"alignment_tax_base_instruct_results{mode_suffix}_{timestamp}.pkl"
-        df.to_pickle(data_path + pickle_filename)
+        local_path = data_path + pickle_filename
+        df.to_pickle(local_path)
         print(f"\n✅ Full results saved to {pickle_filename}")
+
+        # If running in AWS, also upload to S3
+        if os.getenv('ENVIRONMENT') == 'aws':
+            print("☁️  Uploading results to S3...")
+            from S3Handler import S3Handler
+            s3_handler = S3Handler()
+            s3_key = f"runs/{pickle_filename}"
+            if s3_handler.upload_file(local_path, s3_key):
+                print(f"✅ Results uploaded to S3: s3://{s3_handler.bucket_name}/{s3_key}")
+            else:
+                print("⚠️  S3 upload failed (results still saved locally)")
+
         print(f"📝 Excel conversion will happen during analysis phase")
 
         return df
