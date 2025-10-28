@@ -11,6 +11,295 @@ class AlignmentTaxReporter:
         """Initialize with optional default identifier"""
         self.default_id = default_id or datetime.now().strftime("%Y%m%d_%H%M%S")
 
+    def generate_limitations_section(self, df, format='text'):
+        """
+        Generate comprehensive limitations section for academic publication
+
+        Args:
+            df: DataFrame with results
+            format: 'text' or 'markdown' or 'latex'
+
+        Returns:
+            Formatted limitations text
+        """
+        lines = []
+
+        if format == 'text':
+            sep = "="*80
+            subsep = "-"*60
+        elif format == 'markdown':
+            sep = ""
+            subsep = ""
+        else:  # latex
+            sep = ""
+            subsep = ""
+
+        # Header
+        if format == 'text':
+            lines.append(sep)
+            lines.append("STUDY LIMITATIONS")
+            lines.append(sep)
+            lines.append("")
+        elif format == 'markdown':
+            lines.append("## Study Limitations")
+            lines.append("")
+        else:  # latex
+            lines.append("\\section{Limitations}")
+            lines.append("")
+
+        intro = (
+            "This study, while providing valuable insights into alignment tax phenomena, "
+            "is subject to several important limitations that should be considered when "
+            "interpreting the results and their generalizability."
+        )
+        lines.append(intro)
+        lines.append("")
+
+        # 1. Model-Specific Limitations
+        lines.append("### 1. Model-Specific Limitations" if format == 'markdown' else
+                    "\\subsection{Model-Specific Limitations}" if format == 'latex' else
+                    "1. MODEL-SPECIFIC LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **Specific Model Versions**: This study evaluates only Llama 3.1 8B (base and "
+            "instruct variants). Results may not generalize to:\n"
+            "  - Other model families (GPT, Claude, Gemini, etc.)\n"
+            "  - Different model sizes (smaller or larger parameter counts)\n"
+            "  - Different architectures (MoE, state-space models, etc.)\n"
+            "  - Future model versions with different training approaches\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Instruction-Tuning Methodology**: The specific RLHF/instruction-tuning approach "
+            "used by Meta for Llama 3.1 may differ substantially from other organizations' methods. "
+            "Different alignment techniques (Constitutional AI, RLAIF, DPO, etc.) may yield "
+            "different alignment tax patterns.\n"
+        )
+        lines.append("")
+
+        # 2. Evaluation Methodology Limitations
+        lines.append("### 2. Evaluation Methodology Limitations" if format == 'markdown' else
+                    "\\subsection{Evaluation Methodology Limitations}" if format == 'latex' else
+                    "2. EVALUATION METHODOLOGY LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            f"• **Sample Size**: With {len(df):,} total evaluations across {len(df['axis'].unique())} "
+            f"dimensions, sample sizes per dimension range from "
+            f"{df.groupby('axis').size().min()}-{df.groupby('axis').size().max()} evaluations. "
+            "While sufficient for detecting large effects, subtle differences may be underpowered.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **GPT Judge Bias**: Using GPT-4 as the evaluation judge introduces potential biases:\n"
+            "  - May favor responses stylistically similar to GPT's own outputs\n"
+            "  - Could reflect OpenAI's alignment philosophy rather than objective quality\n"
+            "  - Position bias mitigation (randomization) reduces but doesn't eliminate bias\n"
+            "  - Judge consistency not independently verified\n"
+            "  - No inter-rater reliability with human judges\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **3-Point Scale Limitations**: The simplified 1-3 scoring scale:\n"
+            "  - Reduces granularity and may miss subtle differences\n"
+            "  - Chosen for judge consistency, but limits effect size detection\n"
+            "  - May introduce ceiling/floor effects\n"
+            "  - Cardinal interpretation of ordinal scale in statistical analyses\n"
+        )
+        lines.append("")
+
+        # 3. Prompt Generation Limitations
+        lines.append("### 3. Prompt Generation Limitations" if format == 'markdown' else
+                    "\\subsection{Prompt Generation Limitations}" if format == 'latex' else
+                    "3. PROMPT GENERATION LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **GPT-Generated Prompts**: Test prompts were generated by GPT-4, which may:\n"
+            "  - Reflect GPT's understanding of each dimension rather than universal definitions\n"
+            "  - Introduce systematic bias in prompt difficulty or style\n"
+            "  - Miss edge cases that human-designed prompts might include\n"
+            "  - Show distribution mismatch with real-world user queries\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Prompt Count Variance**: Despite requesting specific quantities, GPT sometimes "
+            "generated fewer prompts than requested, requiring retry logic. The 20% buffer and "
+            "3-attempt approach mitigates but doesn't eliminate this issue.\n"
+        )
+        lines.append("")
+
+        # 4. Statistical Limitations
+        lines.append("### 4. Statistical Limitations" if format == 'markdown' else
+                    "\\subsection{Statistical Limitations}" if format == 'latex' else
+                    "4. STATISTICAL LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **Multiple Comparisons**: Testing across multiple dimensions without strict "
+            "Bonferroni correction increases Type I error risk. While findings are consistent "
+            "across dimensions, individual axis results should be interpreted cautiously.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Non-Independence**: Prompts within each dimension may share thematic similarities, "
+            "violating independence assumptions in some statistical tests. This is partially "
+            "addressed through diverse prompt generation, but complete independence is not guaranteed.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Outlier Handling**: The choice of outlier handling method (remove/cap/impute) "
+            "affects results. While we report the method used and its impact, different approaches "
+            "might yield slightly different effect magnitudes.\n"
+        )
+        lines.append("")
+
+        # 5. Generalizability Limitations
+        lines.append("### 5. Generalizability Limitations" if format == 'markdown' else
+                    "\\subsection{Generalizability Limitations}" if format == 'latex' else
+                    "5. GENERALIZABILITY LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **Language**: All prompts and evaluations are in English. Alignment tax patterns "
+            "may differ substantially in other languages, especially lower-resource languages "
+            "where instruction-tuning data is scarcer.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Cultural Context**: Prompts reflect primarily Western/American cultural contexts. "
+            "Safety thresholds, creativity norms, and helpfulness expectations vary across cultures.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Domain Specificity**: While we test across multiple dimensions, coverage of "
+            "specialized domains (medical, legal, technical) is limited. Domain-specific alignment "
+            "taxes may differ from general-purpose results.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Real-World Deployment**: Laboratory evaluation conditions differ from production "
+            "deployment:\n"
+            "  - No user feedback loops\n"
+            "  - Single-turn evaluations (no multi-turn conversations)\n"
+            "  - No context window limitations\n"
+            "  - No real-time constraints\n"
+        )
+        lines.append("")
+
+        # 6. Temporal Limitations
+        lines.append("### 6. Temporal Limitations" if format == 'markdown' else
+                    "\\subsection{Temporal Limitations}" if format == 'latex' else
+                    "6. TEMPORAL LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        lines.append(
+            f"• **Snapshot in Time**: This study was conducted on {current_date}. AI capabilities "
+            "and alignment techniques evolve rapidly. Findings may not hold for:\n"
+            "  - Future model versions\n"
+            "  - Different training data distributions\n"
+            "  - Novel alignment approaches\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Judge Model Evolution**: GPT-4 as the evaluation judge may be updated/changed, "
+            "affecting reproducibility of evaluation scores in future replications.\n"
+        )
+        lines.append("")
+
+        # 7. Methodological Design Limitations
+        lines.append("### 7. Methodological Design Limitations" if format == 'markdown' else
+                    "\\subsection{Methodological Design Limitations}" if format == 'latex' else
+                    "7. METHODOLOGICAL DESIGN LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **Binary Comparison**: Comparing only two model variants (base vs instruct) "
+            "doesn't capture the full spectrum of alignment approaches or intermediate states.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **Dimension Selection**: The five evaluated dimensions (refusal, creativity, "
+            "helpfulness, hedging, hallucination) are not exhaustive. Other important dimensions "
+            "(reasoning, factual knowledge, code generation, multilingual capability) are not assessed.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **No Causal Attribution**: While we observe differences between base and instruct "
+            "models, we cannot definitively attribute them to instruction-tuning alone. Other "
+            "factors (different training data, different checkpoints) may contribute.\n"
+        )
+        lines.append("")
+
+        # 8. Resource and Scope Limitations
+        lines.append("### 8. Resource and Scope Limitations" if format == 'markdown' else
+                    "\\subsection{Resource and Scope Limitations}" if format == 'latex' else
+                    "8. RESOURCE AND SCOPE LIMITATIONS")
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+
+        lines.append(
+            "• **Computational Resources**: Evaluation was conducted on consumer hardware, "
+            "limiting model size and batch processing capabilities. Larger-scale studies might "
+            "reveal different patterns.\n"
+        )
+        lines.append("")
+
+        lines.append(
+            "• **API Costs**: Reliance on GPT-4 API for evaluation introduces cost constraints "
+            "limiting extensive sensitivity analyses or exhaustive prompt coverage.\n"
+        )
+        lines.append("")
+
+        # Concluding Statement
+        if format == 'text':
+            lines.append(subsep)
+        lines.append("")
+        lines.append(
+            "**Interpretation Guidance**: These limitations do not invalidate the findings but "
+            "provide necessary context for interpretation. The observed alignment tax patterns "
+            "are robust within the study's scope, but extrapolation to other models, domains, "
+            "or contexts should be done cautiously. Future research addressing these limitations "
+            "would strengthen confidence in the generalizability of these findings."
+        )
+        lines.append("")
+
+        if format == 'text':
+            lines.append(sep)
+            lines.append("")
+
+        return '\n'.join(lines)
+
+
     def generate_text_report(self, df, output_dir, include_samples=False, 
                             outlier_summary=None, model_scores=None, identifier=None,
                         capability_results=None):
@@ -410,6 +699,12 @@ class AlignmentTaxReporter:
                         f.write(f"Base Score: {median_row['base_score']}, Instruct Score: {median_row['instruct_score']}\n")
                         f.write(f"Alignment Tax: {median_row['alignment_tax']:+.1f}\n")
                         
+            # LIMITATIONS SECTION (Critical for academic publication)
+            f.write("\n\n")
+            limitations_text = self.generate_limitations_section(df, format='text')
+            f.write(limitations_text)
+            f.write("\n\n")
+
             # Enhanced implications section
             f.write("\n" + "="*80 + "\n")
             f.write("IMPLICATIONS FOR AI SAFETY & ALIGNMENT RESEARCH\n")
@@ -804,10 +1099,41 @@ class AlignmentTaxReporter:
                     elements.append(Paragraph(sample_text, styles['Normal']))
                     elements.append(Spacer(1, 12))
         
-        # 6. Conclusions
+        # 6. LIMITATIONS (Critical for publication)
+        elements.append(PageBreak())
+        elements.append(Paragraph("Study Limitations", heading_style))
+        elements.append(Spacer(1, 12))
+
+        # Add key limitations
+        key_limitations = [
+            f"<b>Sample Scope:</b> {len(df):,} evaluations on Llama 3.1 8B only - results may not generalize to other model families, sizes, or architectures",
+            "<b>Evaluation Method:</b> GPT-4 judge may introduce bias favoring stylistically similar responses and reflects OpenAI's alignment philosophy",
+            "<b>Scoring Granularity:</b> 3-point scale reduces sensitivity to subtle differences; chosen for consistency but limits effect size detection",
+            "<b>Dimension Coverage:</b> Five dimensions tested (refusal, creativity, helpfulness, hedging, hallucination) - excludes reasoning, code generation, multilingual capabilities",
+            "<b>Language Limitation:</b> English-only evaluation - alignment tax patterns may differ substantially in other languages",
+            "<b>Prompt Generation:</b> GPT-4 generated prompts may not match real-world query distributions or include all edge cases",
+            "<b>Deployment Context:</b> Laboratory single-turn evaluations differ from production multi-turn conversations with user feedback",
+            "<b>Causal Attribution:</b> While differences are observed, cannot definitively isolate instruction-tuning effects from other training factors",
+            "<b>Temporal Specificity:</b> Snapshot evaluation - AI capabilities evolve rapidly and findings may not hold for future versions"
+        ]
+
+        for limitation in key_limitations:
+            elements.append(Paragraph(f"• {limitation}", styles['Normal']))
+            elements.append(Spacer(1, 8))
+
+        elements.append(Spacer(1, 12))
+        elements.append(Paragraph(
+            "<b>Interpretation Guidance:</b> These limitations provide necessary context but do not invalidate "
+            "findings within the study's defined scope. Results are robust for the specific models and conditions "
+            "tested, but extrapolation to other contexts requires caution and additional validation.",
+            styles['Normal']
+        ))
+
+        # 7. Conclusions
         elements.append(PageBreak())
         elements.append(Paragraph("Conclusions", heading_style))
-        
+        elements.append(Spacer(1, 12))
+
         conclusions = []
         
         if has_negative_tax:
