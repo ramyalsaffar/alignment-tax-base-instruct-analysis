@@ -1,0 +1,63 @@
+# Docker ignore file
+# Excludes unnecessary files from Docker build context
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Results and data
+results/
+logs/
+*.pkl
+*.xlsx
+*.pdf
+*.png
+
+# Models (large files)
+models/
+*.gguf
+*.bin
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Tests
+tests/
+*.test.py
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# AWS credentials (NEVER include!)
+.aws/
+credentials
+*.pem
+*.key
+
+# Environment
+.env
+.env.local

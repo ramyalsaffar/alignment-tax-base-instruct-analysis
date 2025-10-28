@@ -1,0 +1,52 @@
+# Docker Compose for Alignment Tax Experiments
+# ==============================================
+# For local testing before AWS deployment
+
+version: '3.8'
+
+services:
+  alignment-tax:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: alignment-tax:latest
+    container_name: alignment-tax-worker
+
+    # Environment variables
+    environment:
+      - ENVIRONMENT=aws
+      - AWS_REGION=us-east-1
+      - S3_BUCKET_NAME=alignment-tax-results
+      - PYTHONUNBUFFERED=1
+
+    # Mount volumes for local development
+    volumes:
+      - ../src:/app/src
+      - ../aws:/app/aws
+      - ../results:/app/results
+      - ../logs:/app/logs
+      - ../models:/app/models
+
+    # Resource limits (adjust based on your hardware)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 16G
+        reservations:
+          cpus: '2'
+          memory: 8G
+
+    # Keep container running
+    command: tail -f /dev/null
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Networks
+    networks:
+      - alignment-tax-net
+
+networks:
+  alignment-tax-net:
+    driver: bridge
