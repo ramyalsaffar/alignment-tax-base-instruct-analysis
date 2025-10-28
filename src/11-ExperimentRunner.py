@@ -157,26 +157,54 @@ class ExperimentRunner:
         # Results location
         print(f"📁 Results saved to: {data_path}")
     
-    def run_experiment(self, test_mode=False, axes_override=None):
+    def run_experiment(self, test_mode=False, axes_override=None, use_new_flow=True):
         """
         Main experiment execution with configurable settings
-        
+
         Args:
             test_mode: If True, run with reduced samples for testing
             axes_override: Optional dictionary to override axes configuration
-        
+            use_new_flow: If True, use new flow (generate all prompts first)
+
+        Returns:
+            DataFrame with results
+        """
+        if use_new_flow:
+            return self.run_experiment_new_flow(test_mode, axes_override)
+        else:
+            return self.run_experiment_old_flow(test_mode, axes_override)
+
+
+    def run_experiment_new_flow(self, test_mode=False, axes_override=None):
+        """
+        NEW FLOW: Generate all prompts first, then process per-axis
+
+        Flow:
+        1. Generate ALL prompts for ALL axes (with buffer, enumerated)
+        2. Validate prompt counts (retry if needed)
+        3. Remove enumeration
+        4. FOR each axis:
+           - Collect responses from models
+           - Evaluate with GPT
+           - Save intermediate results
+
+        Args:
+            test_mode: If True, run with reduced samples for testing
+            axes_override: Optional dictionary to override axes configuration
+
         Returns:
             DataFrame with results
         """
         self._print_experiment_header(
-            "ALIGNMENT TAX EXPERIMENT" if not test_mode else "TEST MODE EXPERIMENT"
+            "ALIGNMENT TAX EXPERIMENT (New Flow)" if not test_mode else "TEST MODE EXPERIMENT (New Flow)"
         )
-        
+
         print("\n📋 Configuration Summary:")
         print(f"  - Experiment: {EXPERIMENT_CONFIG['experiment_name']}")
         print(f"  - API Rate Limit: {API_CONFIG['rate_limit_calls']} calls per {API_CONFIG['rate_limit_window']}s")
         print(f"  - Model Context: {MODEL_CONFIG['n_ctx']} tokens")
-        
+        print(f"  - Flow: Generate All Prompts First → Process Per-Axis")
+
         # Determine axes to test
         if test_mode:
             print("\n⚠️ TEST MODE - Using reduced samples")
@@ -185,45 +213,187 @@ class ExperimentRunner:
         elif axes_override:
             axes_to_test = axes_override
         else:
-            # AUTO-ADD BUFFER HERE! 
-            buffer_pct = EXPERIMENT_CONFIG.get('prompt_buffer_percentage', 10)
-            axes_to_test = {
-                k: int(v * (1 + buffer_pct / 100)) 
-                for k, v in AXES_CONFIG.items()
-            }
-            print(f"\n📊 Auto-added {buffer_pct}% buffer to all axes")
-        
+            # Use configured axes without auto-buffer (PromptGenerator handles buffer internally)
+            axes_to_test = AXES_CONFIG.copy()
+
         total_samples = sum(axes_to_test.values())
-        print(f"  - Total Samples: {total_samples} (includes buffer)")
-        
+        print(f"  - Total Samples: {total_samples}")
+
         # Build configuration
         config = self._build_config()
-        
+
         # Initialize pipeline
         print("\n🚀 Initializing pipeline...")
         self.pipeline = AlignmentTaxPipeline(config)
-        
+
         # Track timing
         start_time = time.time()
         completed_axes = []
-        
+
         try:
-            # Run evaluation for each axis
-            for idx, (axis, prompt_count) in enumerate(axes_to_test.items(), 1):
+            # ==================================================================
+            # PHASE 1: GENERATE ALL PROMPTS FOR ALL AXES
+            # ==================================================================
+            print(f"\n{'='*60}")
+            print(f"PHASE 1: GENERATING ALL PROMPTS")
+            print(f"{'='*60}\n")
+
+            all_prompts = self.pipeline.generate_all_prompts_first(axes_to_test)
+
+            phase1_time = time.time() - start_time
+            print(f"\n✅ Phase 1 complete in {phase1_time/60:.1f} minutes\n")
+
+            # ==================================================================
+            # PHASE 2: PROCESS EACH AXIS (COLLECT & EVALUATE)
+            # ==================================================================
+            print(f"\n{'='*60}")
+            print(f"PHASE 2: PROCESSING AXES (COLLECT & EVALUATE)")
+            print(f"{'='*60}\n")
+
+            phase2_start = time.time()
+
+            # Process each axis with pre-generated prompts
+            for idx, (axis, prompts) in enumerate(all_prompts.items(), 1):
                 axis_start = time.time()
-                
+
                 print(f"\n{'='*50}")
-                print(f"{idx}. Evaluating {axis.upper()} ({prompt_count} samples)")
+                print(f"{idx}. Processing {axis.upper()} ({len(prompts)} prompts)")
                 print(f"{'='*50}")
-                
-                self.pipeline.run_axis_evaluation(axis, prompt_count)
+
+                self.pipeline.run_axis_evaluation_with_prompts(axis, prompts)
                 completed_axes.append(axis)
-                
+
                 # Save intermediate results if configured
                 if EXPERIMENT_CONFIG.get('save_intermediate', True):
                     intermediate_df = pd.DataFrame(self.pipeline.results)
                     intermediate_file = f"{data_path}intermediate_{axis}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl"
-                    intermediate_df.to_pickle(intermediate_file)  # Use pickle instead of Excel
+                    intermediate_df.to_pickle(intermediate_file)
+                    print(f"💾 Intermediate results saved for {axis}")
+
+                # Show progress
+                axis_time = time.time() - axis_start
+                total_elapsed = time.time() - start_time
+
+                if idx < len(all_prompts) and TIMING_CONFIG.get('estimate_time', True):
+                    avg_time_per_axis = (time.time() - phase2_start) / idx
+                    remaining_axes = len(all_prompts) - idx
+                    eta = avg_time_per_axis * remaining_axes
+                    print(f"\n⏱️ Axis completed in {axis_time/60:.1f} min")
+                    print(f"📊 Progress: {idx}/{len(all_prompts)} axes")
+                    print(f"⏳ Estimated time remaining: {eta/60:.1f} min")
+
+                # Delay between axes
+                if idx < len(all_prompts):
+                    time.sleep(TIMING_CONFIG.get('api_delay', 0.5) * 2)
+
+        except KeyboardInterrupt:
+            print("\n\n⚠️ Experiment interrupted by user!")
+            print(f"✓ Completed axes: {', '.join(completed_axes)}")
+            if self.pipeline.results:
+                print("💾 Saving partial results...")
+                partial_df = self.pipeline.save_results(test_mode)
+                print(f"✓ Saved {len(partial_df)} evaluations")
+            return None
+
+        except Exception as e:
+            print(f"\n❌ Error occurred: {str(e)}")
+            print(f"✓ Completed axes: {', '.join(completed_axes)}")
+            if self.pipeline.results:
+                print("💾 Saving partial results...")
+                partial_df = self.pipeline.save_results(test_mode)
+            raise
+
+        # Save final results
+        print("\n💾 Saving final results...")
+        results_df = self.pipeline.save_results(test_mode=test_mode)
+
+        # Clean up intermediate files if configured
+        if EXPERIMENT_CONFIG.get('save_intermediate', True):
+            self._cleanup_intermediate_files()
+
+        # Final summary
+        total_time = time.time() - start_time
+        self._print_evaluation_success_breakdown()
+        self._print_summary(results_df, total_time/60)
+
+        # Show pipeline stats
+        self.pipeline.print_pipeline_stats()
+
+        # Show API usage stats
+        if hasattr(self.pipeline, 'chatgpt'):
+            api_stats = self.pipeline.chatgpt.get_stats()
+            print(f"\n📈 API Usage:")
+            print(f"  - Total calls: {api_stats['total_calls']}")
+            print(f"  - Errors: {api_stats['errors']}")
+            print(f"  - Success rate: {api_stats['success_rate']:.1f}%")
+
+        return results_df
+
+
+    def run_experiment_old_flow(self, test_mode=False, axes_override=None):
+        """
+        OLD FLOW: Generate prompts and process per-axis sequentially
+
+        Kept for backwards compatibility.
+
+        Args:
+            test_mode: If True, run with reduced samples for testing
+            axes_override: Optional dictionary to override axes configuration
+
+        Returns:
+            DataFrame with results
+        """
+        self._print_experiment_header(
+            "ALIGNMENT TAX EXPERIMENT (Old Flow)" if not test_mode else "TEST MODE EXPERIMENT (Old Flow)"
+        )
+
+        print("\n📋 Configuration Summary:")
+        print(f"  - Experiment: {EXPERIMENT_CONFIG['experiment_name']}")
+        print(f"  - API Rate Limit: {API_CONFIG['rate_limit_calls']} calls per {API_CONFIG['rate_limit_window']}s")
+        print(f"  - Model Context: {MODEL_CONFIG['n_ctx']} tokens")
+
+        # Determine axes to test
+        if test_mode:
+            print("\n⚠️ TEST MODE - Using reduced samples")
+            test_size = EXPERIMENT_CONFIG.get('test_sample_size', 6)
+            axes_to_test = {k: test_size for k in AXES_CONFIG.keys()}
+        elif axes_override:
+            axes_to_test = axes_override
+        else:
+            # Use configured axes
+            axes_to_test = AXES_CONFIG.copy()
+
+        total_samples = sum(axes_to_test.values())
+        print(f"  - Total Samples: {total_samples}")
+
+        # Build configuration
+        config = self._build_config()
+
+        # Initialize pipeline
+        print("\n🚀 Initializing pipeline...")
+        self.pipeline = AlignmentTaxPipeline(config)
+
+        # Track timing
+        start_time = time.time()
+        completed_axes = []
+
+        try:
+            # Run evaluation for each axis
+            for idx, (axis, prompt_count) in enumerate(axes_to_test.items(), 1):
+                axis_start = time.time()
+
+                print(f"\n{'='*50}")
+                print(f"{idx}. Evaluating {axis.upper()} ({prompt_count} samples)")
+                print(f"{'='*50}")
+
+                self.pipeline.run_axis_evaluation(axis, prompt_count)
+                completed_axes.append(axis)
+
+                # Save intermediate results if configured
+                if EXPERIMENT_CONFIG.get('save_intermediate', True):
+                    intermediate_df = pd.DataFrame(self.pipeline.results)
+                    intermediate_file = f"{data_path}intermediate_{axis}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl"
+                    intermediate_df.to_pickle(intermediate_file)
                     print(f"💾 Intermediate results saved for {axis}")
                 
                 # Show progress
