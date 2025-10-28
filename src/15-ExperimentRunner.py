@@ -109,20 +109,40 @@ class ExperimentRunner:
             estimated_time = self._get_time_estimate(sample_count)
             print(f"⏱️ Estimated time: {estimated_time}")
     
+    def _format_time(self, minutes):
+        """
+        Format time in minutes to human-readable string
+
+        Args:
+            minutes: Time in minutes (float)
+
+        Returns:
+            Formatted string (e.g., "45.2 min" or "2.3 hours")
+        """
+        if minutes < 60:
+            return f"{minutes:.1f} min"
+        else:
+            hours = minutes / 60
+            if hours < 2:
+                return f"{hours:.2f} hours ({minutes:.0f} min)"
+            else:
+                return f"{hours:.1f} hours"
+
+
     def _get_time_estimate(self, sample_count):
         """
         Get time estimate for given sample count
-        
+
         Args:
             sample_count: Number of samples to process
-        
+
         Returns:
             String with time estimate
         """
         # Assume ~15 seconds per sample (conservative estimate)
         min_time = sample_count * 12 / 60
         max_time = sample_count * 20 / 60
-        
+
         if min_time < 60:
             return f"{min_time:.0f}-{max_time:.0f} minutes"
         else:
@@ -144,7 +164,7 @@ class ExperimentRunner:
         print(f"✅ Total evaluations: {len(results_df)}")
         
         if runtime_minutes:
-            print(f"⏱️ Total runtime: {runtime_minutes:.1f} minutes")
+            print(f"⏱️ Total runtime: {self._format_time(runtime_minutes)}")
             if len(results_df) > 0:
                 print(f"📊 Average time per evaluation: {runtime_minutes*60/len(results_df):.1f} seconds")
         
@@ -241,7 +261,7 @@ class ExperimentRunner:
             all_prompts = self.pipeline.generate_all_prompts_first(axes_to_test)
 
             phase1_time = time.time() - start_time
-            print(f"\n✅ Phase 1 complete in {phase1_time/60:.1f} minutes\n")
+            print(f"\n✅ Phase 1 complete in {self._format_time(phase1_time/60)}\n")
 
             # ==================================================================
             # PHASE 2: PROCESS EACH AXIS (COLLECT & EVALUATE)
@@ -278,9 +298,9 @@ class ExperimentRunner:
                     avg_time_per_axis = (time.time() - phase2_start) / idx
                     remaining_axes = len(all_prompts) - idx
                     eta = avg_time_per_axis * remaining_axes
-                    print(f"\n⏱️ Axis completed in {axis_time/60:.1f} min")
+                    print(f"\n⏱️ Axis completed in {self._format_time(axis_time/60)}")
                     print(f"📊 Progress: {idx}/{len(all_prompts)} axes")
-                    print(f"⏳ Estimated time remaining: {eta/60:.1f} min")
+                    print(f"⏳ Estimated time remaining: {self._format_time(eta/60)}")
 
                 # Delay between axes
                 if idx < len(all_prompts):
@@ -404,9 +424,9 @@ class ExperimentRunner:
                     avg_time_per_axis = total_elapsed / idx
                     remaining_axes = len(axes_to_test) - idx
                     eta = avg_time_per_axis * remaining_axes
-                    print(f"\n⏱️ Axis completed in {axis_time/60:.1f} min")
+                    print(f"\n⏱️ Axis completed in {self._format_time(axis_time/60)}")
                     print(f"📊 Progress: {idx}/{len(axes_to_test)} axes")
-                    print(f"⏳ Estimated time remaining: {eta/60:.1f} min")
+                    print(f"⏳ Estimated time remaining: {self._format_time(eta/60)}")
                 
                 # Delay between axes
                 if axis != list(axes_to_test.keys())[-1]:
