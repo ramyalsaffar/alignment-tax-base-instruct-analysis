@@ -60,7 +60,7 @@ class S3Handler:
             metadata: Optional metadata dictionary
 
         Returns:
-            S3 key of uploaded file
+            S3 key of uploaded file, or None if failed
         """
         if s3_key is None:
             filename = os.path.basename(local_file_path)
@@ -79,12 +79,31 @@ class S3Handler:
                 ExtraArgs=extra_args
             )
 
-            print(f"✅ Uploaded {local_file_path} to s3://{self.bucket_name}/{s3_key}")
+            print(f"✅ Uploaded to s3://{self.bucket_name}/{s3_key}")
             return s3_key
 
         except ClientError as e:
-            print(f"❌ Error uploading file: {e}")
-            raise
+            print(f"❌ S3 upload failed: {e}")
+            return None
+
+
+    def safe_upload(self, local_file_path, s3_key):
+        """
+        Safe upload with graceful fallback (doesn't crash on failure)
+
+        Args:
+            local_file_path: Path to local file
+            s3_key: S3 object key
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            result = self.upload_file(local_file_path, s3_key)
+            return result is not None
+        except Exception as e:
+            print(f"⚠️  S3 upload skipped: {e}")
+            return False
 
 
     def upload_results(self, results_dir, run_id):
@@ -177,6 +196,47 @@ class S3Handler:
         """
         s3_key = f"logs/{run_id}/{os.path.basename(log_file_path)}"
         return self.upload_file(log_file_path, s3_key)
+
+
+# Helper Function for Easy Integration
+#--------------------------------------
+def upload_to_s3_if_aws(local_file_path, s3_key_prefix, file_type="file"):
+    """
+    Upload file to S3 if running in AWS environment (graceful fallback)
+
+    This is a convenience function that:
+    - Checks if ENVIRONMENT=aws
+    - If yes, uploads to S3
+    - If no or if upload fails, continues without error
+
+    Args:
+        local_file_path: Path to local file
+        s3_key_prefix: S3 key prefix (e.g., 'graphs', 'reports')
+        file_type: Type description for logging (e.g., 'graph', 'report')
+
+    Returns:
+        True if uploaded (or not in AWS mode), False if upload attempted and failed
+    """
+    if os.getenv('ENVIRONMENT') != 'aws':
+        return True  # Not in AWS mode, no upload needed
+
+    try:
+        filename = os.path.basename(local_file_path)
+        s3_key = f"{s3_key_prefix}/{filename}"
+
+        s3_handler = S3Handler()
+        success = s3_handler.safe_upload(local_file_path, s3_key)
+
+        if success:
+            print(f"☁️  {file_type.capitalize()} uploaded to S3")
+        else:
+            print(f"⚠️  {file_type.capitalize()} saved locally only (S3 upload failed)")
+
+        return success
+
+    except Exception as e:
+        print(f"⚠️  {file_type.capitalize()} saved locally only (S3 error: {e})")
+        return False
 
 
 #------------------------------------------------------------------------------

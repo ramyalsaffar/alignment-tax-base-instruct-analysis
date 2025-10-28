@@ -22,7 +22,6 @@ services:
     # Mount volumes for local development
     volumes:
       - ../src:/app/src
-      - ../aws:/app/aws
       - ../results:/app/results
       - ../logs:/app/logs
       - ../models:/app/models

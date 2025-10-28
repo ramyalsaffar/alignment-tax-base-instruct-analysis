@@ -368,10 +368,14 @@ class AlignmentTaxVisualizer:
         # Save with enhanced filename
         prefix = "DISCOVERY_" if has_negative_tax else ""
         filename = f'{prefix}alignment_tax_analysis_dashboard_{id_to_use}.png'
-        plt.savefig(graphs_path + filename, dpi=300, bbox_inches='tight', facecolor='white')
+        full_path = graphs_path + filename
+        plt.savefig(full_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
-        
+
         print(f"📊 Enhanced visualization saved as '{filename}'")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(full_path, 'graphs', 'graph')
         
         # Create additional specialized plot if negative tax detected
         if has_negative_tax:
@@ -585,13 +589,18 @@ class AlignmentTaxVisualizer:
                 bbox=dict(boxstyle='round', facecolor='lightcyan', alpha=0.8))
         
         plt.tight_layout()
-        
+
         # Save the discovery plot
         filename = f'PARADIGM_SHIFT_negative_alignment_tax_{id_to_use}.png'
-        plt.savefig(graphs_path + filename, dpi=300, bbox_inches='tight', facecolor='white')
+        full_path = graphs_path + filename
+        plt.savefig(full_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
-        
+
         print(f"🚨 Paradigm shift plot saved as '{filename}'")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(full_path, 'graphs', 'discovery plot')
+
         return filename
     
     
@@ -660,11 +669,15 @@ class AlignmentTaxVisualizer:
         plt.setp(ax3.get_yticklabels(), fontsize=11)
 
         plt.tight_layout()
-        plt.savefig(graphs_path + f'enhanced_detailed_analysis_{identifier}.png', 
-                    dpi=300, bbox_inches='tight', facecolor='white')
+        filename = f'enhanced_detailed_analysis_{identifier}.png'
+        full_path = graphs_path + filename
+        plt.savefig(full_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
-        
+
         print("📊 Enhanced detailed analysis saved")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(full_path, 'graphs', 'detailed analysis')
     
     
     def create_pareto_frontier(self, df, use_robust_stats=True, pre_cleaned=False, cleaning_method='remove', identifier=None):
@@ -970,10 +983,14 @@ class AlignmentTaxVisualizer:
         
         # Save with identifier
         filename = f'alignment_tax_trade_off_analysis_{id_to_use}.png'
-        plt.savefig(graphs_path + filename, dpi=300, bbox_inches='tight', facecolor='white')
+        full_path = graphs_path + filename
+        plt.savefig(full_path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.show()
-        
+
         print(f"📊 Detailed analysis saved as '{filename}'")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(full_path, 'graphs', 'trade-off analysis')
         
         # Print summary
         print("\n📊 Trade-off Analysis Summary:")
@@ -1115,13 +1132,17 @@ class AlignmentTaxVisualizer:
                      fontsize=14, fontweight='bold', y=1.02)
         
         plt.tight_layout()
-        
+
         # Save figure with identifier
         filename = f'outlier_analysis_{id_to_use}.png'
-        plt.savefig(graphs_path + filename, dpi=300, bbox_inches='tight')
+        full_path = graphs_path + filename
+        plt.savefig(full_path, dpi=300, bbox_inches='tight')
         plt.show()
-        
+
         print(f"✅ Outlier analysis visualization saved as '{filename}'")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(full_path, 'graphs', 'outlier analysis')
         
         # Calculate and return outlier statistics
         outlier_stats = {

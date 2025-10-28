@@ -19,20 +19,60 @@ class ModelManager:
     def __init__(self, model_config=None):
         self.models = {}
         self.config = model_config or {}
-        
+
         # Context tracking
         self.context_usage = {}
-    
+
+
+    def _ensure_model_exists(self, model_path):
+        """
+        Ensure model file exists. If in AWS mode and model doesn't exist,
+        try to download from S3.
+
+        Args:
+            model_path: Path to model file
+
+        Returns:
+            True if model exists or was downloaded successfully
+        """
+        if Path(model_path).exists():
+            return True
+
+        # If not in AWS mode, can't do anything
+        if os.getenv('ENVIRONMENT') != 'aws':
+            return False
+
+        # Try to download from S3
+        try:
+            print(f"📥 Model not found locally, attempting S3 download...")
+            from S3Handler import S3Handler
+
+            # Extract filename from path
+            filename = os.path.basename(model_path)
+            s3_key = f"models/{filename}"
+
+            # Create directory if needed
+            os.makedirs(os.path.dirname(model_path), exist_ok=True)
+
+            s3_handler = S3Handler()
+            s3_handler.download_file(s3_key, str(model_path))
+            print(f"✅ Model downloaded from S3")
+            return True
+
+        except Exception as e:
+            print(f"❌ Model download failed: {e}")
+            return False
+
 
     def load_model(self, model_path, model_name):
-        
-        """Load model with error handling"""
+
+        """Load model with error handling and S3 download support"""
         if model_name not in self.models:
             try:
                 print(f"Loading {model_name}...")
-                
-                # Verify path exists
-                if not Path(model_path).exists():
+
+                # Ensure model exists (downloads from S3 if needed in AWS mode)
+                if not self._ensure_model_exists(model_path):
                     raise FileNotFoundError(f"Model file not found: {model_path}")
                 
                 self.models[model_name] = Llama(

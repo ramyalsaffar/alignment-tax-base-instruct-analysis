@@ -796,8 +796,12 @@ class AlignmentTaxReporter:
                 f.write("more capable AI systems.\n")
             
             f.write("="*80 + "\n")
-        
+
         print(f"📄 Enhanced comprehensive report saved to: {report_path}")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(report_path, 'reports', 'comprehensive report')
+
         return report_path
 
     def generate_professional_executive_summary(self, df, output_dir, identifier=None):
@@ -866,8 +870,12 @@ class AlignmentTaxReporter:
             f.write("For the mission of building safe, beneficial AI, this research\n")
             f.write("offers both immediate insights and longer-term research directions that\n")
             f.write("could render a contribution to the ongoing work in alignment science.\n")
-        
+
         print(f"📄 Professional executive summary saved to: {summary_path}")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(summary_path, 'reports', 'executive summary')
+
         return summary_path
 
     def generate_pdf_report(self, df, output_dir, include_samples=False, 
@@ -1165,11 +1173,15 @@ class AlignmentTaxReporter:
         try:
             doc.build(elements)
             print(f"✅ PDF report saved to: {pdf_path}")
+
+            # Upload to S3 if in AWS mode
+            upload_to_s3_if_aws(pdf_path, 'reports', 'full PDF report')
+
         except Exception as e:
             print(f"⚠️ PDF generation failed: {str(e)}")
             print("Falling back to simple PDF...")
             return self.generate_simple_pdf_report(df, output_dir, identifier)
-                
+
         return pdf_path
     
     def generate_simple_pdf_report(self, df, output_dir, identifier=None,
@@ -1327,8 +1339,12 @@ class AlignmentTaxReporter:
             if has_negative_tax:
                 d['Keywords'] += ', Negative-Alignment-Tax, Paradigm-Shift'
             d['CreationDate'] = datetime.now()
-        
+
         print(f"✅ Simple PDF report saved to: {pdf_path}")
+
+        # Upload to S3 if in AWS mode
+        upload_to_s3_if_aws(pdf_path, 'reports', 'simple PDF report')
+
         return pdf_path
 
 

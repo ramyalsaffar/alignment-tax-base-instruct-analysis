@@ -94,6 +94,51 @@ def get_results_path():
         return base_results_path
 
 
+def validate_aws_environment():
+    """
+    Validate that required environment variables are set when running in AWS mode.
+    Prints warnings for missing optional variables.
+
+    Returns:
+        True if all required variables are set, False otherwise
+    """
+    if not is_aws_environment():
+        return True  # Not in AWS mode, no validation needed
+
+    print("\n🔍 Validating AWS environment...")
+
+    required_vars = ['AWS_REGION', 'S3_BUCKET_NAME']
+    optional_vars = ['SECRETS_OPENAI_KEY_NAME', 'EC2_INSTANCE_TYPE']
+
+    missing_required = []
+    missing_optional = []
+
+    # Check required variables
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_required.append(var)
+
+    # Check optional variables
+    for var in optional_vars:
+        if not os.getenv(var):
+            missing_optional.append(var)
+
+    # Report results
+    if missing_required:
+        print(f"❌ Missing required environment variables: {', '.join(missing_required)}")
+        print(f"   Set these variables before running in AWS mode")
+        return False
+
+    if missing_optional:
+        print(f"⚠️  Optional variables not set (using defaults): {', '.join(missing_optional)}")
+
+    print(f"✅ AWS environment validated")
+    print(f"   Region: {AWS_REGION}")
+    print(f"   S3 Bucket: {S3_BUCKET_NAME}")
+
+    return True
+
+
 #------------------------------------------------------------------------------
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-

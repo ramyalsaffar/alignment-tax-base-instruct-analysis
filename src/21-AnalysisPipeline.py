@@ -50,10 +50,36 @@ class AnalysisPipeline:
     def load_data(self):
         """
         Load results data from pickle or Excel file.
+        In AWS mode, tries to download from S3 first.
         Extracts run_id from filename and performs initial validation.
         """
         print("🚀 ALIGNMENT TAX ANALYSIS - ENHANCED PIPELINE")
         print("=" * 60)
+
+        # If running in AWS, try to download latest results from S3 first
+        if os.getenv('ENVIRONMENT') == 'aws':
+            try:
+                print("☁️  Checking S3 for latest results...")
+                from S3Handler import S3Handler
+                s3_handler = S3Handler()
+
+                # List available runs in S3
+                runs = s3_handler.list_runs()
+                if runs:
+                    latest_run = runs[0]  # Already sorted by date
+                    print(f"📥 Downloading results for run: {latest_run}")
+
+                    # Download the pickle file
+                    s3_key = f"runs/alignment_tax_base_instruct_results_full_{latest_run}.pkl"
+                    local_path = data_path + f"alignment_tax_base_instruct_results_full_{latest_run}.pkl"
+
+                    try:
+                        s3_handler.download_file(s3_key, local_path)
+                        print(f"✅ Downloaded from S3")
+                    except:
+                        print(f"⚠️  S3 download failed, using local files...")
+            except Exception as e:
+                print(f"⚠️  S3 check failed: {e}, using local files...")
 
         # Load results - Try pickle first (complete data), fall back to Excel
         try:

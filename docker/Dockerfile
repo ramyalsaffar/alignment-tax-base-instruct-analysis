@@ -31,10 +31,10 @@ RUN pip install --upgrade pip && \
 
 # Copy source code
 COPY src/ ./src/
-COPY aws/ ./aws/
 
 # Create necessary directories
-RUN mkdir -p /app/results /app/logs /app/models
+RUN mkdir -p /app/results /app/logs /app/models \
+    /app/results/Data /app/results/Reports /app/results/Graphs
 
 # Set up non-root user for security
 RUN useradd -m -u 1000 appuser && \
