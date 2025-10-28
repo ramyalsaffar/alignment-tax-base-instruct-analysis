@@ -21,11 +21,11 @@
 # It provides both command-line and interactive interfaces.
 #
 # Usage:
-#   python 16-Execute.py                # Interactive mode
-#   python 16-Execute.py --test         # Quick test
-#   python 16-Execute.py --full         # Full experiment
-#   python 16-Execute.py --axis         # Single axis test
-#   python 16-Execute.py --custom       # Custom configuration
+#   python 20-Execute.py                # Interactive mode
+#   python 20-Execute.py --test         # Quick test
+#   python 20-Execute.py --full         # Full experiment
+#   python 20-Execute.py --axis         # Single axis test
+#   python 20-Execute.py --custom       # Custom configuration
 #
 ###############################################################################
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         elif sys.argv[1] == '--custom':
             runner.custom_experiment()
         else:
-            print("Usage: python 16-Execute.py [--test|--full|--axis|--custom]")
+            print("Usage: python 20-Execute.py [--test|--full|--axis|--custom]")
             print("\nOptions:")
             print("  --test    Run quick test with reduced samples")
             print("  --full    Run full experiment as configured")

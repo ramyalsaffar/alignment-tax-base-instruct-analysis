@@ -120,21 +120,24 @@ CodeFilePath = project_path + "/03- Code/02- Python/"
 exec(open(CodeFilePath+"01-Config.py").read())
 exec(open(CodeFilePath+"02-Constants.py").read())
 
-# Load remaining code files (03-16)
+# Load remaining code files (03-20)
 #-------------------------------------
-# Files are now numbered 00-17:
+# Files are now numbered 00-21:
 #   00-Imports.py (this file)
 #   01-Config.py (loaded above)
 #   02-Constants.py (loaded above)
-#   03-16: Core modules (load in order)
-#   17-Analyze.py (don't load - run separately)
+#   03-06: AWS Infrastructure (config, secrets, S3, EC2)
+#   07-11: Core API & Generation (ModelManager, GPT_API, PromptGenerator, ResponseCollector, ResponseEvaluator)
+#   12-18: Pipeline & Analysis (Pipeline, OutlierHandler, Analyzers, Visualizer, Reporter)
+#   19-20: Execution (ExperimentRunner, Execute)
+#   21-Analyze.py (don't load - run separately)
 code_files_ls = os.listdir(CodeFilePath)
 code_files_ls.sort()
 code_files_ls = [x for x in code_files_ls if "py" in x]
 code_files_ls.pop(0) # pop Imports file (00-Imports.py)
 code_files_ls.pop(0) # pop Config file (01-Config.py) - already loaded
 code_files_ls.pop(0) # pop Constants file (02-Constants.py) - already loaded
-code_files_ls.pop(-1) # pop Analyze file (17-Analyze.py)
+code_files_ls.pop(-1) # pop Analyze file (21-Analyze.py)
 
 
 # Loop over code files
