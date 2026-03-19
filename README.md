@@ -1,5 +1,18 @@
 # Negative Alignment Tax: Empirical Analysis of Instruction-Tuning Effects on LLM Behavior
 
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
+![LLM](https://img.shields.io/badge/LLM-Llama%203.1%208B-orange)
+![Inference](https://img.shields.io/badge/Inference-llama--cpp--python-lightgrey)
+![Judge](https://img.shields.io/badge/Judge-GPT--4o-412991?logo=openai)
+![pandas](https://img.shields.io/badge/pandas-Data%20Analysis-150458?logo=pandas)
+![numpy](https://img.shields.io/badge/numpy-Numerics-013243?logo=numpy)
+![scipy](https://img.shields.io/badge/scipy-Statistics-8CAAE6)
+![statsmodels](https://img.shields.io/badge/statsmodels-Power%20Analysis-4B8BBE)
+![matplotlib](https://img.shields.io/badge/matplotlib-Visualization-11557C)
+![seaborn](https://img.shields.io/badge/seaborn-Visualization-4C72B0)
+![ReportLab](https://img.shields.io/badge/ReportLab-PDF%20Generation-red)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 ## Finding
 
 This project empirically measures the **alignment tax** -- the performance cost conventionally assumed to accompany instruction-tuning -- by systematically comparing Llama 3.1 8B (base) against Llama 3.1 8B Instruct across five behavioral dimensions. The results challenge the conventional framing: instruction-tuning produced **negative alignment tax across all five dimensions**, meaning the instruct model outperformed the base model on every axis evaluated.
