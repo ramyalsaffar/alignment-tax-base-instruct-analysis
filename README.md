@@ -21,7 +21,9 @@ Scores are on a 1-3 scale. Alignment Tax = Base Score - Instruct Score. Negative
 
 ---
 
-## Measurement Formula
+## Methodology
+
+### Measurement Formula
 
 ```
 Alignment Tax = Base Model Score - Instruction-Tuned Model Score
@@ -30,10 +32,6 @@ Alignment Tax = Base Model Score - Instruction-Tuned Model Score
 - Positive value: traditional alignment tax (base model outperforms instruct)
 - Negative value: instruct model outperforms base model
 - Zero: no difference
-
----
-
-## Methodology
 
 ### Models
 
@@ -195,56 +193,6 @@ Per-axis statistical analysis in `AlignmentTaxStatisticalAnalyzer`:
 
 ---
 
-## Outputs
-
-| Output | Description |
-|--------|-------------|
-| PNG dashboard | 8-panel visualization: scores by axis, alignment tax by axis, score distributions, significance heatmap, scatter plot, approach-level breakdown, KDE density comparison, summary metrics panel |
-| Discovery PNG | Specialized 6-panel plot generated automatically when overall tax is negative: universal improvement bar chart, before/after comparison, statistical significance, implications, methodology validation, research directions |
-| Outlier analysis PNG | Raw vs cleaned score distributions, failed evaluations by axis, alignment tax boxplot comparison, sample size impact per axis |
-| Pareto frontier PNG | 4-panel capability-safety trade-off: main frontier with MAD error bars and confidence assessment, detailed score breakdown with sample sizes, violin distributions, data quality summary |
-| Full text report (.txt) | Complete per-axis statistics including approach-level breakdowns; qualitative examples per axis (most-improved, least-improved, and median example each with prompt, scores, and truncated responses); outlier summary; capability analysis; trade-off assessment |
-| Professional executive summary (.txt) | Condensed findings formatted for professional/research audiences |
-| Simple PDF report | 2-page PDF: overview charts + per-axis alignment tax histograms |
-| Full PDF report | Multi-page PDF built with ReportLab: title page, executive summary table, per-axis bar charts embedded as figures, full statistical table with p-values, sample prompts section, conclusions |
-| Pickle (.pkl) | Full results dataframe with complete prompt text and full model responses preserved |
-| Excel (.xlsx) | Truncated response previews (500 chars per response) for manual inspection; illegal Excel characters stripped |
-
-### Intermediate Checkpointing and Crash Recovery
-
-After each axis completes, results accumulated so far are saved to a per-axis intermediate pickle file. This means a hardware failure, API outage, or manual interruption mid-experiment does not lose all preceding work. On a clean completion, intermediate files are automatically deleted. On a `KeyboardInterrupt` or unhandled exception, the partial results are saved before the process exits and intermediate files are preserved for recovery. API usage statistics (total calls, error count, success rate) are printed at the end of each run.
-
----
-
-## Repository Structure
-
-```
-alignment-tax-base-instruct-analysis/
-├── README.md
-├── src/
-│   ├── 01-RunFirst.py                        # Dependencies, paths, display settings
-│   ├── 02-ModelManager.py                    # Local LLM loading and stateless inference
-│   ├── 03-GPT_API.py                         # GPT-4o API: prompt generation and scoring
-│   ├── 04-AlignmentTaxPipeline.py            # Main pipeline: prompt gen, inference, evaluation
-│   ├── 05-OutlierHandler.py                  # Data validation, outlier detection, cleaning
-│   ├── 06-AlignmentTaxAnalyzer.py            # Descriptive analysis, percentage calculations
-│   ├── 07-AlignmentTaxStatisticalAnalyzer.py # Hypothesis testing, effect sizes, power analysis
-│   ├── 08-AlignmentTaxCapabilityAnalyzer.py  # Capability-heavy prompt classification and comparison
-│   ├── 09-AlignmentTaxVisualizer.py          # Visualization suite
-│   ├── 10-AlignmentTaxReporter.py            # Text and PDF report generation
-│   ├── 11-ExperimentRunner.py                # Execution modes, checkpointing, crash recovery, Excel export
-│   ├── 12-Config.py                          # Centralized configuration
-│   ├── 13-Execute.py                         # Entry point (CLI and interactive)
-│   └── 14-Analyze.py                         # Analysis pipeline (load -> clean -> analyze -> report)
-├── data/
-├── visualizations/
-├── reports/
-├── requirements.txt
-└── LICENSE
-```
-
----
-
 ## Quick Start
 
 ### Requirements
@@ -335,6 +283,56 @@ AXES_CONFIG = {
     'hallucination': 120,
 }
 ```
+
+---
+
+## Repository Structure
+
+```
+alignment-tax-base-instruct-analysis/
+├── README.md
+├── src/
+│   ├── 01-RunFirst.py                        # Dependencies, paths, display settings
+│   ├── 02-ModelManager.py                    # Local LLM loading and stateless inference
+│   ├── 03-GPT_API.py                         # GPT-4o API: prompt generation and scoring
+│   ├── 04-AlignmentTaxPipeline.py            # Main pipeline: prompt gen, inference, evaluation
+│   ├── 05-OutlierHandler.py                  # Data validation, outlier detection, cleaning
+│   ├── 06-AlignmentTaxAnalyzer.py            # Descriptive analysis, percentage calculations
+│   ├── 07-AlignmentTaxStatisticalAnalyzer.py # Hypothesis testing, effect sizes, power analysis
+│   ├── 08-AlignmentTaxCapabilityAnalyzer.py  # Capability-heavy prompt classification and comparison
+│   ├── 09-AlignmentTaxVisualizer.py          # Visualization suite
+│   ├── 10-AlignmentTaxReporter.py            # Text and PDF report generation
+│   ├── 11-ExperimentRunner.py                # Execution modes, checkpointing, crash recovery, Excel export
+│   ├── 12-Config.py                          # Centralized configuration
+│   ├── 13-Execute.py                         # Entry point (CLI and interactive)
+│   └── 14-Analyze.py                         # Analysis pipeline (load -> clean -> analyze -> report)
+├── data/
+├── visualizations/
+├── reports/
+├── requirements.txt
+└── LICENSE
+```
+
+---
+
+## Outputs
+
+| Output | Description |
+|--------|-------------|
+| PNG dashboard | 8-panel visualization: scores by axis, alignment tax by axis, score distributions, significance heatmap, scatter plot, approach-level breakdown, KDE density comparison, summary metrics panel |
+| Discovery PNG | Specialized 6-panel plot generated automatically when overall tax is negative: universal improvement bar chart, before/after comparison, statistical significance, implications, methodology validation, research directions |
+| Outlier analysis PNG | Raw vs cleaned score distributions, failed evaluations by axis, alignment tax boxplot comparison, sample size impact per axis |
+| Pareto frontier PNG | 4-panel capability-safety trade-off: main frontier with MAD error bars and confidence assessment, detailed score breakdown with sample sizes, violin distributions, data quality summary |
+| Full text report (.txt) | Complete per-axis statistics including approach-level breakdowns; qualitative examples per axis (most-improved, least-improved, and median example each with prompt, scores, and truncated responses); outlier summary; capability analysis; trade-off assessment |
+| Professional executive summary (.txt) | Condensed findings formatted for professional/research audiences |
+| Simple PDF report | 2-page PDF: overview charts + per-axis alignment tax histograms |
+| Full PDF report | Multi-page PDF built with ReportLab: title page, executive summary table, per-axis bar charts embedded as figures, full statistical table with p-values, sample prompts section, conclusions |
+| Pickle (.pkl) | Full results dataframe with complete prompt text and full model responses preserved |
+| Excel (.xlsx) | Truncated response previews (500 chars per response) for manual inspection; illegal Excel characters stripped |
+
+### Intermediate Checkpointing and Crash Recovery
+
+After each axis completes, results accumulated so far are saved to a per-axis intermediate pickle file. This means a hardware failure, API outage, or manual interruption mid-experiment does not lose all preceding work. On a clean completion, intermediate files are automatically deleted. On a `KeyboardInterrupt` or unhandled exception, the partial results are saved before the process exits and intermediate files are preserved for recovery. API usage statistics (total calls, error count, success rate) are printed at the end of each run.
 
 ---
 
